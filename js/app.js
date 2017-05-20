@@ -10,6 +10,8 @@ $(document).ready(function(){
   // Array to store the list of recipes currently on the page
   var recipeList = [];
   var numVisibleRecipes = 0;
+  var myRecipes = [];
+  var recipeDetail;
   var currentQuery;
 
   //Creds for Yummly API
@@ -63,8 +65,11 @@ $(document).ready(function(){
       var request = App.requestRecipeFeed();
       //some lines of code to test
       request.done(function(response) {
+        $("#portfolio").find(".row").empty();
+        recipeList = [];
         App.extractRecipeListFromFeed(response.matches, false);
         App.renderRecipeList(recipeList);
+        $("#loadMore").show();
       });
     },
     requestRecipeFeed: function(query, start){
@@ -85,7 +90,6 @@ $(document).ready(function(){
     extractRecipeFromRecipeObject: function(recipeObject){
       var Recipe = {
         id: recipeObject.id,
-        source: recipeObject.sourceDisplayName,
         name: recipeObject.recipeName.length > 33 ? recipeObject.recipeName.substring(0,33) + "..." : Utils.padStringRight(recipeObject.recipeName, 35, "_"),
         image: recipeObject.smallImageUrls[0].substring(0, recipeObject.smallImageUrls[0].indexOf("=")) + "=s360"
       };
@@ -106,9 +110,7 @@ $(document).ready(function(){
     bindEvents: function() {
       // Attach event listeners
 
-      $(".modal-body").on("click", "button", function(){
-
-      });
+      $(".modal-body").on("click", "#saveRecipe", App.saveRecipe);
       $("#ingredientList").on("dblclick", "p", function(){
         this.contentEditable=true;
         this.className='inEdit';
@@ -118,16 +120,39 @@ $(document).ready(function(){
         this.className='';
       });
       $(".stylish-input-group").on("keypress", App.doSearch);
+      $(".glyphicon-search").on("click", App.doSearch);
       $("#portfolio").on("click", ".portfolio-item", App.renderRecipe);
       $("#loadMore").on("click", App.loadMoreRecipes);
+      $(".navbar-brand").on("click", App.init);
+      $("#myRecipes").on("click", function(){
+        $("#portfolio").find(".row").empty();
+        $("#loadMore").hide();
+        App.renderRecipeList(myRecipes);
+      });
+
     },
     //render single recipe detail
+    saveRecipe: function(){
+      foundRecipeInList = _.findWhere(myRecipes, {id: recipeDetail.id});
+      if (foundRecipeInList === undefined){
+        var Recipe = {
+          id: recipeDetail.id,
+          name: recipeDetail.name > 33 ? recipeDetail.name.substring(0,33) + "..." : Utils.padStringRight(recipeDetail.name, 35, "_"),
+          image: recipeDetail.image
+        };
+        myRecipes.push(Recipe);
+        alert("Recipe Saved");
+      } else {
+        alert("Recipe already in list");
+      }
+
+    },
     renderRecipe: function(recipe){
       console.log("rendering");
       var request = App.requestSingleRecipe($(this).attr('id'));
-
       request.done(function(response){
-        var recipeDetail = {
+        recipeDetail = {
+          id: response.id,
           name: response.name,
           image: response.images[0].hostedLargeUrl.substring(0, response.images[0].hostedLargeUrl.indexOf("=")) + "=s720",
           prepTime: response.totalTime,
@@ -143,8 +168,9 @@ $(document).ready(function(){
         $(".modal-body").find("#prepTime").html("Total Time: " + "<strong>" + recipeDetail.prepTime + "</strong>");
         $(".modal-body").find("#servings").html("Number of Servings: " + "<strong>" + recipeDetail.servings + "</strong>");
         $(".modal-body").find("#rating").html("Yummly Rating: " + "<strong>" + recipeDetail.rating + "/5</strong>");
-        $(".modal-body").find("button").html("See full recipe at " + recipeDetail.site);
-        $(".modal-body").find("button").attr('onclick', "window.open('" + recipeDetail.link + "','_blank')");
+        $(".modal-body").find("#goToSite").html("See full recipe at " + recipeDetail.site);
+        $(".modal-body").find("#goToSite").attr('onclick', "window.open('" + recipeDetail.link + "','_blank')");
+        $(".modal-body").find("#ingredientList").empty();
         recipeDetail.ingredients.forEach(function(ingredient){
           $(".modal-body").find("#ingredientList").append("<p contentEditable='false' class=''>" + ingredient + "</p>");
         });
@@ -160,10 +186,9 @@ $(document).ready(function(){
         App.extractRecipeListFromFeed(response.matches, true);
         App.renderRecipeList(recipeList);
       });
-
     },
     doSearch: function(e) {
-      if(e.which === ENTER_KEY) {
+      if(e.which === ENTER_KEY || e.type === "click") {
         inputVal = $("input").val().trim().replace(" ", "+");
         currentQuery = inputVal;
         if (inputVal.length > 0){
@@ -172,10 +197,11 @@ $(document).ready(function(){
             App.extractRecipeListFromFeed(response.matches, false);
             $("#portfolio").find(".row").empty();
             App.renderRecipeList(recipeList);
+            $("#loadMore").show();
+            $("input").val("");
           });
         }
         else {
-          $("input").val("");
           App.init();
         }
       }
