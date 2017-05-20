@@ -9,6 +9,8 @@
 $(document).ready(function(){
   // Array to store the list of recipes currently on the page
   var recipeList = [];
+  var numVisibleRecipes = 0;
+  var currentQuery;
 
   //Creds for Yummly API
   var APP_ID = "c5ee5221";
@@ -55,21 +57,19 @@ $(document).ready(function(){
   // App object to store all app related methods
   var App = {
     init: function() {
+      console.log("init!");
+      App.bindEvents();
       //initiate an API call to the default source
       var request = App.requestRecipeFeed();
       //some lines of code to test
       request.done(function(response) {
-        console.log(Utils.padStringRight("something", 15, "x"));
-        App.extractRecipeListFromFeed(response.matches);
+        App.extractRecipeListFromFeed(response.matches, false);
         App.renderRecipeList(recipeList);
       });
-      // Methods that need to be called on initialization
-      //App.storeRecipes;
-      App.bindEvents();
-
     },
-    requestRecipeFeed: function(query){
-      var url = Utils.constructFeedURL(APP_ID, API_KEY, query);
+    requestRecipeFeed: function(query, start){
+      var url = Utils.constructFeedURL(APP_ID, API_KEY, query, start);
+      console.log(url);
       return $.ajax(url, {
         dataType: 'json'
       });
@@ -86,40 +86,97 @@ $(document).ready(function(){
       var Recipe = {
         id: recipeObject.id,
         source: recipeObject.sourceDisplayName,
-        name: recipeObject.recipeName.length > 44 ? recipeObject.recipeName.substring(0,44) + "..." : Utils.padStringRight(recipeObject.recipeName, 39, "-"),
+        name: recipeObject.recipeName.length > 33 ? recipeObject.recipeName.substring(0,33) + "..." : Utils.padStringRight(recipeObject.recipeName, 35, "_"),
         image: recipeObject.smallImageUrls[0].substring(0, recipeObject.smallImageUrls[0].indexOf("=")) + "=s360"
       };
       return Recipe;
     },
-    extractRecipeListFromFeed: function(recipeObjectList){
+    extractRecipeListFromFeed: function(recipeObjectList, append){
+      if (!append){
+        numVisibleRecipes = 0;
+      }
       recipeList = [];
       recipeObjectList.forEach(function(recipeObject) {
         recipe = App.extractRecipeFromRecipeObject(recipeObject);
         recipeList.push(recipe);
+        numVisibleRecipes ++;
       });
     },
+
     bindEvents: function() {
       // Attach event listeners
-      $(".stylish-input-group").on("keypress", App.doSearch);
-    },
 
+      $(".modal-body").on("click", "button", function(){
+
+      });
+      $("#ingredientList").on("dblclick", "p", function(){
+        this.contentEditable=true;
+        this.className='inEdit';
+      });
+      $("#ingredientList").on("blur", "p", function(){
+        this.contentEditable=false;
+        this.className='';
+      });
+      $(".stylish-input-group").on("keypress", App.doSearch);
+      $("#portfolio").on("click", ".portfolio-item", App.renderRecipe);
+      $("#loadMore").on("click", App.loadMoreRecipes);
+    },
     //render single recipe detail
     renderRecipe: function(recipe){
+      console.log("rendering");
+      var request = App.requestSingleRecipe($(this).attr('id'));
+
+      request.done(function(response){
+        var recipeDetail = {
+          name: response.name,
+          image: response.images[0].hostedLargeUrl.substring(0, response.images[0].hostedLargeUrl.indexOf("=")) + "=s720",
+          prepTime: response.totalTime,
+          servings: response.yield,
+          rating: response.rating,
+          ingredients: response.ingredientLines,
+          link: response.source.sourceRecipeUrl,
+          site: response.source.sourceDisplayName
+        };
+        console.log(response);
+        $(".modal-body").find("h2").html(recipeDetail.name);
+        $(".modal-body").find("img").attr("src", recipeDetail.image);
+        $(".modal-body").find("#prepTime").html("Total Time: " + "<strong>" + recipeDetail.prepTime + "</strong>");
+        $(".modal-body").find("#servings").html("Number of Servings: " + "<strong>" + recipeDetail.servings + "</strong>");
+        $(".modal-body").find("#rating").html("Yummly Rating: " + "<strong>" + recipeDetail.rating + "/5</strong>");
+        $(".modal-body").find("button").html("See full recipe at " + recipeDetail.site);
+        $(".modal-body").find("button").attr('onclick', "window.open('" + recipeDetail.link + "','_blank')");
+        recipeDetail.ingredients.forEach(function(ingredient){
+          $(".modal-body").find("#ingredientList").append("<p contentEditable='false' class=''>" + ingredient + "</p>");
+        });
+
+      });
     },
 
+    loadMoreRecipes: function(){
+      var request = App.requestRecipeFeed(currentQuery, numVisibleRecipes);
+      //some lines of code to test
+      request.done(function(response) {
+        console.log("Loading more recipes");
+        App.extractRecipeListFromFeed(response.matches, true);
+        App.renderRecipeList(recipeList);
+      });
+
+    },
     doSearch: function(e) {
       if(e.which === ENTER_KEY) {
         inputVal = $("input").val().trim().replace(" ", "+");
+        currentQuery = inputVal;
         if (inputVal.length > 0){
           var request = App.requestRecipeFeed(inputVal);
           request.done(function(response) {
-            App.extractRecipeListFromFeed(response.matches);
+            App.extractRecipeListFromFeed(response.matches, false);
             $("#portfolio").find(".row").empty();
             App.renderRecipeList(recipeList);
           });
         }
         else {
           $("input").val("");
+          App.init();
         }
       }
     },
@@ -128,7 +185,7 @@ $(document).ready(function(){
       recipeTemplate = _.template(
         "<div class='col-sm-4 portfolio-item' id ='<%= id %>'>" +
           "<a href='#portfolioModal' class='portfolio-link' data-toggle='modal'>" +
-              "<img src='<%= image %>' class='img-responsive'>" +
+              "<img height='240' src='<%= image %>' class='img-responsive'>" +
           "</a>" +
           "<h3 style='background-color: black;  padding: 10px; color: white; margin: 0;'> <%= name %> </h3>" +
         "</div>");

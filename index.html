@@ -15,7 +15,7 @@
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Theme CSS -->
-    <link href="css/freelancer.min.css" rel="stylesheet">
+    <link href="css/freelancer.css" rel="stylesheet">
 
     <!-- Custom Fonts -->
     <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
@@ -61,45 +61,7 @@
                       </div>
                 </div>
           </div>
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <!-- <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1"> -->
-                <!-- <ul class="nav navbar-nav navbar-right">
-                    <li class="hidden">
-                        <a href="#page-top"></a>
-                    </li>
-                    <li class="page-scroll">
-                        <a href="#portfolio">Portfolio</a>
-                    </li>
-                    <li class="page-scroll">
-                        <a href="#about">About</a>
-                    </li>
-                    <li class="page-scroll">
-                        <a href="#contact">Contact</a>
-                    </li>
-                </ul> -->
-            <!-- </div> -->
-            <!-- /.navbar-collapse -->
         </div>
-
-        <!-- search bar -->
-        <!-- <div class="container"> -->
-          	<!-- <div class="row">
-                  <div class="col-sm-6 col-sm-offset-3">
-                      <div id="imaginary_container">
-                          <div class="input-group stylish-input-group">
-                              <input type="text" class="form-control"  placeholder="Search" >
-                              <span class="input-group-addon">
-                                  <button type="submit">
-                                      <span class="glyphicon glyphicon-search"></span>
-                                  </button>
-                              </span>
-                          </div>
-                      </div>
-                  </div>
-          	</div> -->
-          <!-- </div> -->
-          <!-- search bar -->
-        <!-- /.container-fluid -->
     </nav>
 
     <!-- Header -->
@@ -118,21 +80,15 @@
         </div> -->
     </header>
 
-    <!-- Portfolio Grid Section -->
+    <!-- Recipe Grid Section -->
     <section id="portfolio">
         <div class="container">
-            <!-- <div class="row">
-                <div class="col-lg-12 text-center">
-                    <h2>Portfolio</h2>
-                    <hr class="star-primary">
-                </div>
-            </div> -->
-
             <div style="margin-top: 40px;" class="row">
               <!-- Recipe images populated here-->
             </div>
-            <a href="#" class="previous text-center">&laquo; Previous</a>
-            <a href="#" class="next text-center">Next &raquo;</a>
+            <div style="margin-top: 40px;">
+              <button type="button" class="btn btn-default" id="loadMore"> Load More Recipes </button>
+            </div>
         </div>
     </section>
 
@@ -156,7 +112,7 @@
         </a>
     </div>
 
-    <!-- Portfolio Modals -->
+    <!-- Recipe Modal -->
     <div class="portfolio-modal modal fade" id="portfolioModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-content">
             <div class="close-modal" data-dismiss="modal">
@@ -169,25 +125,21 @@
                 <div class="row">
                     <div class="col-lg-8 col-lg-offset-2">
                         <div class="modal-body">
-                            <h2>Project Title</h2>
+                            <h2>Recipe Name Goes Here</h2>
                             <hr class="star-primary">
-                            <img src="img/portfolio/cabin.png" class="img-responsive img-centered" alt="">
-                            <p>Use this area of the page to describe your project. The icon above is part of a free icon set by <a href="https://sellfy.com/p/8Q9P/jV3VZ/">Flat Icons</a>. On their website, you can download their free set with 16 icons, or you can purchase the entire set with 146 icons for only $12!</p>
+                            <img src="https://images.pexels.com/photos/5938/food-salad-healthy-lunch.jpg?w=940&h=650&auto=compress&cs=tinysrgb" class="img-responsive img-centered" alt="">
+                            <h3>Ingredients</h3>
+                            <h5>Double click any ingredient to edit!</h5>
+                            <p></p>
+                            <p></p>
+                            <div id="ingredientList">
+                            </div>
                             <ul class="list-inline item-details">
-                                <li>Client:
-                                    <strong><a href="http://startbootstrap.com">Start Bootstrap</a>
-                                    </strong>
-                                </li>
-                                <li>Date:
-                                    <strong><a href="http://startbootstrap.com">April 2014</a>
-                                    </strong>
-                                </li>
-                                <li>Service:
-                                    <strong><a href="http://startbootstrap.com">Web Development</a>
-                                    </strong>
-                                </li>
+                                <li id="prepTime">Total Time: </li>
+                                <li id='servings'>Number of Servings: </li>
+                                <li id='rating'>Yummly Rating: </li>
                             </ul>
-                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+                            <button type="button" class="btn btn-default"> Go To Site</button>
                         </div>
                     </div>
                 </div>
@@ -212,8 +164,6 @@
 
     <!-- Core App Javascript -->
     <script src="js/app.js"></script>
-
->
 
 </body>
 
