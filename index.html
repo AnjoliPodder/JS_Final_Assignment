@@ -45,7 +45,6 @@
                 <a class="navbar-brand" href="#page-top">RecipEDIT</a>
             </div>
             <div class="container">
-                <!-- <div style=class="row"> -->
                 <div style="padding-top: 10px;" class="row">
                       <div class="col-sm-6 col-sm-offset-3">
                           <div id="imaginary_container">
@@ -61,23 +60,26 @@
                       </div>
                 </div>
           </div>
+          <a id="myRecipes" href="#">My Recipes</a>
         </div>
     </nav>
 
     <!-- Header -->
     <header>
-        <!-- <div class="container" id="maincontent" tabindex="-1">
+      <!--
+         <div class="container" id="maincontent" tabindex="-1">
             <div class="row">
                 <div class="col-lg-12">
-                    <img class="img-responsive" src="img/profile.png" alt="">
+                    <img class="img-responsive" src="img/cake3.png" alt="">
                     <div class="intro-text">
-                        <h1 class="name">Start Bootstrap</h1>
+                        <h1 class="name">RecipEDIT</h1>
                         <hr class="star-light">
-                        <span class="skills">Web Developer - Graphic Artist - User Experience Designer</span>
+                        <span class="skills">An editable recipe resource!</span>
                     </div>
                 </div>
             </div>
-        </div> -->
+        </div>
+        -->
     </header>
 
     <!-- Recipe Grid Section -->
@@ -139,7 +141,8 @@
                                 <li id='servings'>Number of Servings: </li>
                                 <li id='rating'>Yummly Rating: </li>
                             </ul>
-                            <button type="button" class="btn btn-default"> Go To Site</button>
+                            <button type="button" class="btn btn-default" id="goToSite"> Go To Site </button>
+                            <button type="button" class="btn btn-default" id="saveRecipe"> Save Recipe </button>
                         </div>
                     </div>
                 </div>
@@ -147,6 +150,8 @@
         </div>
     </div>
 
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/4.0.0/firebase.js"></script>
     <!-- jQuery -->
     <script src="vendor/jquery/jquery.min.js"></script>
 
