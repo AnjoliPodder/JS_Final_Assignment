@@ -9,9 +9,14 @@
 $(document).ready(function(){
   // Array to store the list of recipes currently on the page
   var recipeList = [];
+  // variable to show the number of recipes on the page. Used as the start point
+  // for subsequent API calls when loading more recipes
   var numVisibleRecipes = 0;
-  var myRecipes = [];
+
+  // Contains the current recipe visible in the modal
   var recipeDetail;
+  // Contains the current active query. Used for loading more recipes while
+  // there is an active search
   var currentQuery;
 
   //Creds for Yummly API
@@ -21,6 +26,21 @@ $(document).ready(function(){
   var ENTER_KEY = 13;
   var MAX_RESULTS = 12;
 
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyD33XOpuHx6SE8akdmIxmeQMtLoJ2L4Ll4",
+    authDomain: "recipedit-37d30.firebaseapp.com",
+    databaseURL: "https://recipedit-37d30.firebaseio.com",
+    projectId: "recipedit-37d30",
+    storageBucket: "recipedit-37d30.appspot.com",
+    messagingSenderId: "541859645941"
+  };
+  firebase.initializeApp(config);
+  var db = firebase.database();
+  var firebaseAuth = firebase.auth();
+  var provider = new firebase.auth.GoogleAuthProvider();
+  var myRecipes;
+  var currentUser;
 
   // Utils object to store any misc. methods
   var Utils = {
@@ -110,8 +130,8 @@ $(document).ready(function(){
     bindEvents: function() {
       // Attach event listeners
 
-      $(".modal-body").on("click", "#saveRecipe", App.saveRecipe);
-      $(".modal-body").on("click", "#deleteRecipe", App.deleteRecipe);
+      $(".modal-body").on("click", "#saveRecipe", this.saveRecipe.bind(this));
+      $(".modal-body").on("click", "#deleteRecipe", this.deleteRecipe.bind(this));
       $("#ingredientList").on("dblclick", "p", function(){
         this.contentEditable=true;
         this.className='inEdit';
@@ -120,26 +140,51 @@ $(document).ready(function(){
         this.contentEditable=false;
         this.className='';
       });
-      $(".stylish-input-group").on("keypress", App.doSearch);
-      $(".glyphicon-search").on("click", App.doSearch);
+      $(".stylish-input-group").on("keypress", this.doSearch.bind(this));
+      $(".glyphicon-search").on("click", this.doSearch.bind(this));
       $("#portfolio").on("click", ".portfolio-item", App.renderRecipe);
-      $("#loadMore").on("click", App.loadMoreRecipes);
-      $(".navbar-brand").on("click", App.init);
-      $("#myRecipes").on("click", function(){
-        $("#portfolio").find(".row").empty();
-        $("#loadMore").hide();
-        App.renderRecipeList(myRecipes);
-      });
+      $("#loadMore").on("click", this.loadMoreRecipes.bind(this));
+      $(".navbar-brand").on("click", this.init.bind(this));
+      $("#myRecipes").on("click", this.showMyRecipes.bind(this));
 
     },
     deleteRecipe: function(){
-      foundRecipeInList = _.findWhere(myRecipes, {id: recipeDetail.id});
+  /*    foundRecipeInList = _.findWhere(myRecipes, {id: recipeDetail.id});
       if (foundRecipeInList === undefined){
         alert("This recipe is not in your collection");
       } else {
         myRecipes= _.without(myRecipes, _.findWhere(myRecipes, {id: recipeDetail.id}));
         alert("Recipe deleted");
-      }
+      } */
+    },
+    showMyRecipes: function(){
+      console.log("showMyRecipes triggered");
+      firebaseAuth.onAuthStateChanged(function(user) {
+        if (user) {
+          // Signed-in User Information
+          currentUser = user;
+          console.log(currentUser);
+          console.log(currentUser.displayName);
+          myRecipes = db.ref("users/" + user.uid + "/myRecipes");
+          $("#portfolio").find(".row").empty();
+          $("#loadMore").hide();
+          recipeListFromDB = [];
+          db.ref("users/" + currentUser.uid + "/myRecipes").once('value').then(function(snapshot){
+            snapshot.forEach(function(recipeSnapshot){
+              recipeListFromDB.push(recipeSnapshot.val());
+            });
+            console.log("rendering MyRecipes");
+            App.renderRecipeList(recipeListFromDB);
+          });
+        } else {
+          // Google Sign-in
+          firebaseAuth.signInWithPopup(provider).then(function(result) {
+          }).catch(function(error) {
+            console.log(error);
+          });
+        }
+      });
+
     },
     saveRecipe: function(){
       foundRecipeInList = _.findWhere(myRecipes, {id: recipeDetail.id});
@@ -231,5 +276,5 @@ $(document).ready(function(){
 
     },
   };
-  App.init();
+   App.init();
 });
