@@ -111,6 +111,7 @@ $(document).ready(function(){
       // Attach event listeners
 
       $(".modal-body").on("click", "#saveRecipe", App.saveRecipe);
+      $(".modal-body").on("click", "#deleteRecipe", App.deleteRecipe);
       $("#ingredientList").on("dblclick", "p", function(){
         this.contentEditable=true;
         this.className='inEdit';
@@ -131,7 +132,15 @@ $(document).ready(function(){
       });
 
     },
-    //render single recipe detail
+    deleteRecipe: function(){
+      foundRecipeInList = _.findWhere(myRecipes, {id: recipeDetail.id});
+      if (foundRecipeInList === undefined){
+        alert("This recipe is not in your collection");
+      } else {
+        myRecipes= _.without(myRecipes, _.findWhere(myRecipes, {id: recipeDetail.id}));
+        alert("Recipe deleted");
+      }
+    },
     saveRecipe: function(){
       foundRecipeInList = _.findWhere(myRecipes, {id: recipeDetail.id});
       if (foundRecipeInList === undefined){
@@ -145,7 +154,6 @@ $(document).ready(function(){
       } else {
         alert("Recipe already in list");
       }
-
     },
     renderRecipe: function(recipe){
       console.log("rendering");
@@ -162,7 +170,6 @@ $(document).ready(function(){
           link: response.source.sourceRecipeUrl,
           site: response.source.sourceDisplayName
         };
-        console.log(response);
         $(".modal-body").find("h2").html(recipeDetail.name);
         $(".modal-body").find("img").attr("src", recipeDetail.image);
         $(".modal-body").find("#prepTime").html("Total Time: " + "<strong>" + recipeDetail.prepTime + "</strong>");
